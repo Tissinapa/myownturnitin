@@ -22,15 +22,16 @@ def extract_text_from_pdf(pdf_file):
     
 def save_pdf_to_db(pdf):
     try:
-        pdf_text = extract_text_from_pdf(pdf)
-        if pdf_text:
+        extracted_pdf_text = extract_text_from_pdf(pdf)
+        if extracted_pdf_text:
             pdf_name = os.path.basename(pdf)
             #save to mongo
             collection.insert_one({
                 "filename": pdf_name,
-                "file_data": pdf_text
+                "file_data": extracted_pdf_text
             })
             print(f"pdf {pdf_name} saved to mongo.")
+            #compare_pdfs(extracted_pdf_text)
         else: 
             print(f"Failed to extract text from {pdf}")
     except Exception as err:
@@ -38,9 +39,10 @@ def save_pdf_to_db(pdf):
         return
 
 
+
 @app.route("/compare", methods=["POST"])
 
-def compare_pdfs():
+def compare_pdfs(extracted_pdf_text):
     ref_file = request.files['reference']
     candi_file = request.files['candidate']
     
