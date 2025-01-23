@@ -4,7 +4,7 @@ from pymongo import MongoClient
 import pdfplumber
 import os
 
-app = Flask(__name__)
+#app = Flask(__name__)
 
 # Mongodb set up
 client = MongoClient("mongodb://localhost:27017")
@@ -31,7 +31,7 @@ def save_pdf_to_db(pdf):
                 "file_data": extracted_pdf_text
             })
             print(f"pdf {pdf_name} saved to mongo.")
-            #compare_pdfs(extracted_pdf_text)
+            
         else: 
             print(f"Failed to extract text from {pdf}")
     except Exception as err:
@@ -40,19 +40,46 @@ def save_pdf_to_db(pdf):
 
 
 
-@app.route("/compare", methods=["POST"])
+#@app.route("/compare", methods=["POST"])
 
-def compare_pdfs(extracted_pdf_text):
-    ref_file = request.files['reference']
-    candi_file = request.files['candidate']
+def compare_pdfs_bertscore(ref_text, candi_text):
+    #ref_file = request.files['reference']
+    #candi_file = request.files['candidate']
     
+    try:
+        P, R, F1 = score([candi_text], [ref_text], lang = "en", verbose=True)
+        
+        return {
+            "Precision": P.mean().item(),
+            "Recall": R.mean().item(),
+            "F1": F1.mean().item()
+        }
+        
+    except Exception as err:
+        print(err)
+        return
+
     
-
-
-if __name__ == "__main__":
+def main():
+    
     print("testi")
     pdf_file= "test_pdf.pdf"
+    pdf_file_candi = "test_pdf_takaperin.pdf"
     save_pdf_to_db(pdf_file)
+    ref_text = extract_text_from_pdf(pdf_file)
+    candi_text = extract_text_from_pdf(pdf_file_candi)
+    results = compare_pdfs_bertscore(ref_text, candi_text)
+    
+    if results:
+        print("\nBERTScore Results:")
+        print(f"Precision: {results['Precision']:.4f}")
+        print(f"Recall: {results['Recall']:.4f}")
+        print(f"F1 Score: {results['F1']:.4f}")
+    else:
+        print("Failed to compute BERTScore.")
+
+if __name__ == "__main__":
+    main()
     
     
 
