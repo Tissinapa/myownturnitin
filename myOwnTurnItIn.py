@@ -59,7 +59,7 @@ def compare_pdfs_bertscore(ref_text, candi_text):
         print(err)
         return
 
-    
+
 def main():
     
     print("testi")
@@ -78,8 +78,12 @@ def main():
     else:
         print("Failed to compute BERTScore.")
 
+def testii():
+    print("Docker testi")
+
 if __name__ == "__main__":
-    main()
+    testii()
+    ##main()
     
     
 
